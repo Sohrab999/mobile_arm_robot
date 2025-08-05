@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name="camera_link_l" value="0.01"/>
+    <xacro:property name="camera_link_b" value="0.1"/>
+    <xacro:property name="camera_link_h" value="0.05"/>
+
+    <link name="camera_link">
+        <visual>
+            <geometry>
+                <box size="${camera_link_l} ${camera_link_b} ${camera_link_h}"/>
+            </geometry>
+            <material name="grey"/>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${camera_link_l} ${camera_link_b} ${camera_link_h}"/>
+            </geometry>
+        </collision>
+        <xacro:box_inertia m="0.1" x="${camera_link_l}" y="${camera_link_b}" z="${camera_link_h}"
+                           o_xyz="0 0 0" o_rpy="0 0 0"/>
+    </link>
+
+    <joint name="base_camera_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="camera_link"/>
+        <origin xyz="${base_length/2.0+camera_link_l/2.0} 0 0.1" rpy="0 0 0"/>
+    </joint>
+
+
+    <link name="camera_link_optical"/>
+
+    <joint name="camera_optical_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2.0} 0 ${-pi/2.0}"/>
+      <parent link="camera_link"/>
+      <child link="camera_link_optical"/>
+    </joint>
+
+    <gazebo reference="camera_link">
+        <sensor name="camera" type="camera"> 
+            <topic>image</topic>
+          <update_rate>20</update_rate>
+          <always_on>1</always_on>
+          <visualize>true</visualize>
+          <camera>
+            <optical_frame_id>camera_link_optical</optical_frame_id>
+            <camera_info_topic>camera_info</camera_info_topic>
+            <horizontal_fov>.75</horizontal_fov>
+            <image>
+              <width>640</width>
+              <height>480</height>
+              <format>R8G8B8</format>
+            </image>
+            <clip>
+              <near>0.2</near>
+              <far>12.3</far>
+            </clip>
+            <save enabled='true'>
+              <path>/tmp/cam</path>
+            </save>
+            <noise>
+              <type>gaussian</type>
+              <mean>0.0</mean>
+              <stddev>0.0</stddev>
+            </noise>
+            <distortion>
+              <k1>0.1</k1>
+              <k2>0.2</k2>
+              <k3>0.3</k3>
+              <p1>0.4</p1>
+              <p2>0.5</p2>
+              <center>0.2 0.4</center>
+            </distortion>
+            <lens>
+              <type>custom</type>
+              <scale_to_hfov>false</scale_to_hfov>
+              <custom_function>
+                <c1>1.1</c1>
+                <c2>2.2</c2>
+                <c3>3.3</c3>
+                <f>1.2</f>
+                <fun>sin</fun>
+              </custom_function>
+              <cutoff_angle>0.7505</cutoff_angle>
+              <env_texture_size>128</env_texture_size>
+              <intrinsics>
+                <fx>280</fx>
+                <fy>281</fy>
+                <cx>162</cx>
+                <cy>124</cy>
+                <s>1.2</s>
+              </intrinsics>
+              <projection>
+                <p_fx>282</p_fx>
+                <p_fy>283</p_fy>
+                <p_cx>163</p_cx>
+                <p_cy>125</p_cy>
+                <tx>1</tx>
+                <ty>2</ty>
+              </projection>
+            </lens>
+          </camera>
+        </sensor>
+    </gazebo>
+
+</robot>
